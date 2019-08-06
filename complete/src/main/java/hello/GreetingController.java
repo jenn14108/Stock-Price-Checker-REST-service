@@ -1,13 +1,20 @@
 package hello;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.*;
+import java.util.*;
+import java.lang.*;
+
+
 
 @RestController
 public class GreetingController {
@@ -27,8 +34,8 @@ public class GreetingController {
             produces =  MediaType.APPLICATION_JSON_VALUE)
     //we want to take in two parameters - the ticker and the number of days of data to display
     public String prices(
-            @RequestParam(value = "ticker" , defaultValue="DNKN") String ticker){
-//          @RequestParam(value = "numDays" , defaultValue = "1") Integer numDays){
+            @RequestParam(value = "ticker" , defaultValue="DNKN") String ticker,
+            @RequestParam(value = "numDays", defaultValue="20") String numDays) throws IOException {
 
         //the alpha vantage querying url with ticker is a variable
         final String AlphaVantageUri = "https://www.alphavantage.co/query?" +
@@ -39,6 +46,40 @@ public class GreetingController {
 
         RestTemplate restTemplate = new RestTemplate();
         //use the restTemplate to submit a GET request with user variables
-        return restTemplate.getForObject(AlphaVantageUri, String.class, ticker);
+        ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, ticker);
+
+        //create a JsonNode as the root
+        JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
+        StringBuilder prices = new StringBuilder();
+
+        JsonNode metaData = rootNode.get("Meta Data");
+        prices.append(metaData.path("2. Symbol").asText()+"\n");
+
+        //go into the main chunk of JSON containing all the dates
+        JsonNode timeSeriesStart = rootNode.get("Time Series (Daily)");
+        //create an iterator for all dates
+        Iterator<String> dates = timeSeriesStart.fieldNames();
+        Integer counter = 1;
+        while(counter <= Integer.parseInt(numDays) && dates.hasNext()){
+            String date = dates.next();
+            JsonNode fieldValue = timeSeriesStart.get(date);
+            prices.append("\n" + date + " :\n");
+            prices.append("Open: " + fieldValue.path("1. open").asText()+"\n");
+            prices.append("High: " + fieldValue.path("2. high").asText()+"\n");
+            prices.append("Low: " + fieldValue.path("3. low").asText()+"\n");
+            prices.append("Close: " + fieldValue.path("4. close").asText()+"\n");
+            prices.append("Volume: " + fieldValue.path("5. volume").asText()+"\n");
+
+            counter++;
+        }
+
+        //return initialRes.getBody();
+        return prices.toString();
+
+
+
+
+
+
     }
 }
