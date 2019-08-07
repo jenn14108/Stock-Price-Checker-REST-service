@@ -2,6 +2,8 @@ package hello;
 
 import java.io.*;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,8 +80,6 @@ public class RequestController {
             counter++;
         }
 
-        String res = objectMapper.writeValueAsString(parsed);
-        parsed = null;
-        return res;
+        return objectMapper.writeValueAsString(parsed).replaceAll("\\\\", "");
     }
 }
