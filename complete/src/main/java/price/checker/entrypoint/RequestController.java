@@ -1,19 +1,13 @@
-package hello;
+package price.checker.entrypoint;
 
 import java.io.*;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.core.*;
 import java.util.*;
 import java.lang.*;
 
@@ -80,6 +74,8 @@ public class RequestController {
             counter++;
         }
 
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed).replaceAll("\\\\", "");
+        return objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(parsed)
+                .replaceAll("\\\\", "");
     }
 }
