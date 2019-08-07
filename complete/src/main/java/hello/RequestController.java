@@ -1,6 +1,6 @@
 package hello;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +18,10 @@ import java.lang.*;
 
 
 @RestController
-public class GreetingController {
+public class RequestController {
 
-    private static final String template = "Hello, %s!";
-    private final AtomicLong counter = new AtomicLong();
     private final String API_KEY = "KB7DSCK48G00WIRE";
 
-    @RequestMapping("/greeting")
-    public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
-        return new Greeting(counter.incrementAndGet(),
-                            String.format(template, name));
-    }
 
     //This is the url that is mapped to this method
     @GetMapping(value = "/prices",
@@ -36,7 +29,8 @@ public class GreetingController {
     //we want to take in two parameters - the ticker and the number of days of data to display
     public String prices(
             @RequestParam(value = "stock" , defaultValue="DNKN") String stock,
-            @RequestParam(value = "days", defaultValue="5") Integer days) throws IOException {
+            @RequestParam(value = "days", defaultValue="5") Integer days)
+            throws IOException {
 
 
         //the alpha vantage querying url with ticker is a variable
@@ -50,38 +44,42 @@ public class GreetingController {
         //use the restTemplate to submit a GET request with user variables
         ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, stock);
 
+        return getSpecifiedDays(initialRes, days);
+    }
+
+    /**
+     * This method is used to parse the returned JSON data from Alpha Vantage to only display
+     * the stock prices for the number of days specified by the user
+     * @param initialRes
+     * @param days
+     * @return
+     * @throws IOException
+     */
+    public String getSpecifiedDays(ResponseEntity<String> initialRes, Integer days) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String,String> parsed = new LinkedHashMap<>();
+
         //create a JsonNode as the root
         JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
-        StringBuilder prices = new StringBuilder();
+        //put first chunk of JSON data into the map.
+        //this chunk is unique to each query and only shows up once
+        parsed.put("Meta Data", rootNode.get("Meta Data").toString());
 
-        JsonNode metaDataParent = rootNode.path("Meta Data");
-        prices.append(metaDataParent.path("2. Symbol").asText()+"\n");
 
-        //go into the main chunk of JSON containing all the dates
+        //this is the chunk of JSON with all the stock info
         JsonNode timeSeriesStart = rootNode.get("Time Series (Daily)");
-        //create an iterator for all dates
         Iterator<String> dates = timeSeriesStart.fieldNames();
+        //now we need to loop through and get all the stock prices for the days user specified
         Integer counter = 1;
-        while(counter <= days && dates.hasNext()){
+        while (counter <= days && dates.hasNext()){
             String date = dates.next();
-            JsonNode fieldValue = timeSeriesStart.get(date);
-            prices.append("\n" + date + " :\n");
-            prices.append("Open: " + fieldValue.path("1. open").asText()+"\n");
-            prices.append("High: " + fieldValue.path("2. high").asText()+"\n");
-            prices.append("Low: " + fieldValue.path("3. low").asText()+"\n");
-            prices.append("Close: " + fieldValue.path("4. close").asText()+"\n");
-            prices.append("Volume: " + fieldValue.path("5. volume").asText()+"\n");
-
+            JsonNode dateNode = timeSeriesStart.get(date);
+            parsed.put(date,dateNode.toString());
             counter++;
         }
 
-        //return initialRes.getBody();
-        return prices.toString();
-
-
-
-
-
-
+        String res = objectMapper.writeValueAsString(parsed);
+        parsed = null;
+        return res;
     }
 }
