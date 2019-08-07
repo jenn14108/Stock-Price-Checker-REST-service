@@ -31,24 +31,24 @@ public class GreetingController {
     }
 
     //This is the url that is mapped to this method
-    @GetMapping(value = "/prices/{numDays}",
+    @GetMapping(value = "/prices",
             produces =  MediaType.APPLICATION_JSON_VALUE)
     //we want to take in two parameters - the ticker and the number of days of data to display
     public String prices(
-            @RequestParam(value = "ticker" , defaultValue="DNKN") String ticker,
-            @PathVariable(required = false) Integer numDays) throws IOException {
-        // @RequestParam(value = "numDays", defaultValue="5") Integer numDays)
+            @RequestParam(value = "stock" , defaultValue="DNKN") String stock,
+            @RequestParam(value = "days", defaultValue="5") Integer days) throws IOException {
+
 
         //the alpha vantage querying url with ticker is a variable
         final String AlphaVantageUri = "https://www.alphavantage.co/query?" +
                 "function=TIME_SERIES_DAILY&" +
-                "symbol={ticker}&" +
+                "symbol={stock}&" +
                 "outputsize=full&" +
                 "apikey="+API_KEY;
 
         RestTemplate restTemplate = new RestTemplate();
         //use the restTemplate to submit a GET request with user variables
-        ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, ticker);
+        ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, stock);
 
         //create a JsonNode as the root
         JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
@@ -62,7 +62,7 @@ public class GreetingController {
         //create an iterator for all dates
         Iterator<String> dates = timeSeriesStart.fieldNames();
         Integer counter = 1;
-        while(counter <= numDays && dates.hasNext()){
+        while(counter <= days && dates.hasNext()){
             String date = dates.next();
             JsonNode fieldValue = timeSeriesStart.get(date);
             prices.append("\n" + date + " :\n");
