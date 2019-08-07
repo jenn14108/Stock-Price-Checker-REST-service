@@ -80,6 +80,6 @@ public class RequestController {
             counter++;
         }
 
-        return objectMapper.writeValueAsString(parsed).replaceAll("\\\\", "");
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed).replaceAll("\\\\", "");
     }
 }
