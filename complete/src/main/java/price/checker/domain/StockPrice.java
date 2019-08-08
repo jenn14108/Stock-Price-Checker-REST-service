@@ -5,9 +5,10 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * This is the company model/schema that will be used in MySQL
- * This model will have a simple field for its ticker, and an embedded field
- * for all of its price data titled "DailyTimeSeries"
+ * This is the model/schema for the StockPrice table stored in MySQL
+ * It uses an ID class called "StockPriceId"
+ * Because the StockPrice table uses a composite key, it's required for a
+ * separate, serializable class to be created for the key
  */
 @Entity //This tells Hibernate to make a table out of this class
 @Table(name="Stock_Price")

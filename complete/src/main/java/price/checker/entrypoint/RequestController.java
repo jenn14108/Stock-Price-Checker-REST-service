@@ -28,6 +28,7 @@ import java.util.Date;
 @Slf4j
 public class RequestController {
 
+    //let Spring do its thing and initialize the two services
     @Autowired
     StockPriceRpsyService StockPriceRpsyService;
 

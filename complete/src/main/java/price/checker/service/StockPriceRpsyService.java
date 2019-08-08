@@ -27,7 +27,7 @@ public class StockPriceRpsyService {
 
     @Autowired
     private StockPriceRepository stockPriceRepository;
-
+    
     public void saveStockPrice() throws ParseException {
         String dateString = "2019-08-07";
         String pattern = "yyyy-MM-dd";
