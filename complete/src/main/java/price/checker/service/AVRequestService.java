@@ -22,7 +22,7 @@ public class AVRequestService {
 
     private final String API_KEY = "KB7DSCK48G00WIRE";
 
-    public String getStockData (String stock, Integer days) throws IOException{
+    public String getStockData (String symbol, Integer days) throws IOException{
         //the alpha vantage querying url with ticker is a variable
         final String AlphaVantageUri = "https://www.alphavantage.co/query?" +
                 "function=TIME_SERIES_DAILY&" +
@@ -32,7 +32,7 @@ public class AVRequestService {
 
         RestTemplate restTemplate = new RestTemplate();
         //use the restTemplate to submit a GET request with user variables
-        ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, stock);
+        ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, symbol);
 
         return getSpecifiedDays(initialRes, days);
     }

@@ -36,11 +36,11 @@ public class RequestController {
             produces =  MediaType.APPLICATION_JSON_VALUE)
     //we want to take in two parameters - the ticker and the number of days of data to display
     public String prices(
-            @RequestParam(value = "stock" , defaultValue="DNKN") String stock,
+            @RequestParam(value = "symbol" , defaultValue="DNKN") String symbol,
             @RequestParam(value = "days", defaultValue="5") Integer days)
             throws IOException, ParseException {
 
         StockPriceRpsyService.saveStockPrice();
-        return AVRequestService.getStockData(stock,days);
+        return AVRequestService.getStockData(symbol,days);
     }
 }
