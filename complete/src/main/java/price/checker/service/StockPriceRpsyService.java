@@ -1,15 +1,10 @@
 package price.checker.service;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.aspect4log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ResponseBody;
 import price.checker.domain.rpsy.StockPriceRepository;
 import price.checker.domain.StockPrice;
-
-import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,8 +15,6 @@ import java.util.Date;
  */
 
 @Slf4j
-@Log
-@Validated
 @Service
 public class StockPriceRpsyService {
 

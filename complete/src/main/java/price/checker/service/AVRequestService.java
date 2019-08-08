@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-import net.sf.aspect4log.Log;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestTemplate;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -20,8 +17,6 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Slf4j
-@Log
-@Validated
 @Service
 public class AVRequestService {
 

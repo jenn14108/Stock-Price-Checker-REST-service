@@ -22,13 +22,11 @@ public class StockPriceId implements Serializable {
         this.date = date;
     }
 
-    @Override
-    public boolean equals(Object o){
-        return false;
+    public String getSymbol(){
+        return this.symbol;
     }
 
-    @Override
-    public int hashCode(){
-        return 0;
+    public Date getDate(){
+        return this.date;
     }
 }
