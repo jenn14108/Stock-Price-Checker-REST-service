@@ -2,14 +2,19 @@ package price.checker.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestTemplate;
+import price.checker.domain.StockPrice;
+
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +27,21 @@ public class AVRequestService {
 
     private final String API_KEY = "KB7DSCK48G00WIRE";
 
-    public String getStockData (String symbol, Integer days) throws IOException{
+    @Autowired
+    StockPriceRpsyService StockPriceRpsyService;
+
+
+    /**
+     * This method is used when we have confirmed that the price data the the user
+     * wants does not exist in our database. This method queries Alpha Vantage and
+     * passes a ResponseEntity object to StockPriceRpsyService to save as StockPrice Objects
+     * @param symbol
+     * @param days
+     * @return
+     * @throws IOException
+     */
+    public List<StockPrice> getStockData (String symbol, Integer days)
+                                        throws IOException, ParseException {
         //the alpha vantage querying url with ticker is a variable
         final String AlphaVantageUri = "https://www.alphavantage.co/query?" +
                 "function=TIME_SERIES_DAILY&" +
@@ -34,42 +53,7 @@ public class AVRequestService {
         //use the restTemplate to submit a GET request with user variables
         ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, symbol);
 
-        return getSpecifiedDays(initialRes, days);
-    }
-
-    /**
-     * This method is used to parse the returned JSON data from Alpha Vantage to only display
-     * the stock prices for the number of days specified by the user
-     * @param initialRes
-     * @param days
-     * @return
-     * @throws IOException
-     */
-    public static String getSpecifiedDays(ResponseEntity<String> initialRes, Integer days) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> parsed = new LinkedHashMap<>();
-
-        //create a JsonNode as the root
-        JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
-        //put first chunk of JSON data into the map.
-        //this chunk is unique to each query and only shows up once
-        parsed.put("Meta Data", rootNode.get("Meta Data").toString());
-
-
-        //this is the chunk of JSON with all the stock info
-        JsonNode timeSeriesStart = rootNode.get("Time Series (Daily)");
-        Iterator<String> dates = timeSeriesStart.fieldNames();
-        //now we need to loop through and get all the stock prices for the days user specified
-        Integer counter = 1;
-        while (counter <= days && dates.hasNext()) {
-            String date = dates.next();
-            JsonNode dateNode = timeSeriesStart.get(date);
-            parsed.put(date, dateNode.toString());
-            counter++;
-        }
-
-        return objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(parsed)
-                .replaceAll("\\\\", "");
+        StockPriceRpsyService.saveAVPrices(symbol, initialRes, days);
+        return StockPriceRpsyService.retrievePrices(symbol,days);
     }
 }
