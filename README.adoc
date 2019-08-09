@@ -1,6 +1,6 @@
 == Stock Price Checker REST Service
 
-A service that accepts HTTP GET requests at:
+This is a service created with Spring Boot that queries to Alpha Vantage to retrieve price data on various public companies. It accepts HTTP GET requests at:
 
 ----
 http://localhost:8080/prices
@@ -12,4 +12,4 @@ Two optional parameters `symbol` and `days` are accepted in the query string.
 http://localhost:8080/prices?symbol=TSLA&days=20
 ----
 
-The `symbol` parameter value overrides the default value of "DNKN" and the `days` parameter value overrides the default value of "5".
+The `symbol` parameter value overrides the default value of "DNKN" and the `days` parameter value overrides the default value of "5"
