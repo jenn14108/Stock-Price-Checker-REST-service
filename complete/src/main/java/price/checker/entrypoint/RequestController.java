@@ -37,13 +37,15 @@ public class RequestController {
     @GetMapping(value = "/prices",
             produces =  MediaType.APPLICATION_JSON_VALUE)
     //we want to take in two parameters - the ticker and the number of days of data to display
-    public List<StockPrice> getPrices(
+    public String getPrices(
             @RequestParam(value = "symbol" , defaultValue="DNKN") String symbol,
             @RequestParam(value = "days", defaultValue="5") Integer days)
             throws IOException, ParseException {
 
         Integer found = StockPriceRpsyService.checkForWantedPrices(symbol);
-        if (found == 1){ //we have all the data we want in db, immediately fetch
+
+        if (found == 1){ //we have all the data we want in db (*excluding data from today)
+                        //immediately fetch
             return StockPriceRpsyService.retrievePrices(symbol,days);
         } //we don't have all data we want, query AV, save in db, fetch
         return AVRequestService.getStockData(symbol,days);

@@ -6,6 +6,7 @@ import price.checker.domain.StockPrice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 
@@ -21,7 +22,7 @@ public interface StockPriceRepository extends JpaRepository<StockPrice,String>{
     @Query(value = "SELECT COUNT(*) " +
             "FROM stock_price " +
             "WHERE symbol = ?1 " +
-            "AND date = CAST(now() as date)", nativeQuery = true)
+            "AND date = CURRENT_DATE - 1", nativeQuery = true)
     Integer findMostRecent(String symbol);
 
 
@@ -34,5 +35,13 @@ public interface StockPriceRepository extends JpaRepository<StockPrice,String>{
             "ORDER BY date DESC " +
             "LIMIT ?2", nativeQuery = true)
     List<StockPrice> findAllMatches(String symbol, Integer displayDays);
+
+
+    @Query(value = "SELECT date " +
+            "FROM stock_price " +
+            "WHERE symbol = ?1 " +
+            "ORDER BY date DESC " +
+            "LIMIT 1", nativeQuery = true)
+    Date retrieveMostRecentDate(String symbol);
 
 }

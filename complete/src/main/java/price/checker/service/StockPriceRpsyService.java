@@ -13,6 +13,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * This is the service responsible for updating, deleting, retrieving
@@ -35,7 +37,6 @@ public class StockPriceRpsyService {
      * @param symbol
      */
     public Integer checkForWantedPrices(String symbol)throws ParseException, IOException {
-
         return stockPriceRepository.findMostRecent(symbol);
     }
 
@@ -45,23 +46,32 @@ public class StockPriceRpsyService {
      * @param days
      * @return
      */
-    public List<StockPrice> retrievePrices(String symbol, Integer days){
-        return stockPriceRepository.findAllMatches(symbol, days);
+    public String retrievePrices(String symbol, Integer days){
+       List<StockPrice> prices = stockPriceRepository.findAllMatches(symbol, days);
+       return "Symbol: " + symbol + prices.stream().map(sp -> sp.toString()).collect(Collectors.joining("\n"));
+
+
+
     }
 
     /**
      * This method is used to parse the returned JSON data from Alpha Vantage to only display
      * the stock prices for the number of days specified by the user
      * @param initialRes
-     * @param days
      * @return
      * @throws IOException
      */
-    public void saveAVPrices(String symbol, ResponseEntity<String> initialRes, Integer days)
+    public void saveAVPrices(String symbol, ResponseEntity<String> initialRes)
                                 throws IOException, ParseException {
 
         //create a List to store all Stock Price objects for batch save
         List<StockPrice> prices = new ArrayList<>();
+        //we want this date as a check so that we don't re-save prices for every day, only save new prices
+        Date currInDB = stockPriceRepository.retrieveMostRecentDate(symbol);
+        String currDateDBString = null;
+        if (currInDB != null){
+            currDateDBString = DF.format(currInDB);
+        }
         //create a JsonNode as the root
         JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
 
@@ -69,9 +79,16 @@ public class StockPriceRpsyService {
         //this is the chunk of JSON with all the stock info
         JsonNode timeSeriesStart = rootNode.get("Time Series (Daily)");
         Iterator<String> dates = timeSeriesStart.fieldNames();
+
+        //we want to skip today, because prices and trading volume is still changing
+        dates.next();
+
         //now we need to loop through and get all the stock prices and save into db
         while (dates.hasNext()) {
             String dateString = dates.next();
+            if (dateString.equals(currDateDBString)){
+                break;
+            }
             JsonNode dateNode = timeSeriesStart.get(dateString);
             StockPrice spObj = new StockPrice(symbol, DF.parse(dateString),
                     Double.parseDouble(dateNode.findValue("1. open").asText()),

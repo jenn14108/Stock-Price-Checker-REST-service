@@ -1,6 +1,8 @@
 package price.checker.domain;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -54,9 +56,7 @@ public class StockPrice {
         return this.symbol;
     }
 
-    public Date getDate(){
-        return this.date;
-    }
+    public Date getDate(){return this.date; }
 
     public Double getOpeningPrice(){
         return this.open;
@@ -76,6 +76,12 @@ public class StockPrice {
 
     public Integer getVolume(){
         return this.volume;
+    }
+
+    public String getDateString(){
+        Date d = this.getDate();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        return df.format(d);
     }
 
     public void setSymbol(String nSymbol){
@@ -104,6 +110,16 @@ public class StockPrice {
 
     public void setVolume(Integer nVolume){
         this.volume = nVolume;
+    }
+
+
+    public String toString(){
+        return "\n\tdate: " + this.getDateString() + "\n\t\t" +
+                "closing price: " + this.getClosingPrice() + "\n\t\t" +
+                "highest price: " + this.getHighestPrice() + "\n\t\t" +
+                "lowest price: " + this.getLowestPrice() + "\n\t\t" +
+                "opening price " + this.getOpeningPrice() + "\n\t\t" +
+                "trading volume: " + this.getVolume();
     }
 
 }

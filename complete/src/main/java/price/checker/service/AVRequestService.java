@@ -40,7 +40,7 @@ public class AVRequestService {
      * @return
      * @throws IOException
      */
-    public List<StockPrice> getStockData (String symbol, Integer days)
+    public String getStockData (String symbol, Integer days)
                                         throws IOException, ParseException {
         //the alpha vantage querying url with ticker is a variable
         final String AlphaVantageUri = "https://www.alphavantage.co/query?" +
@@ -53,7 +53,7 @@ public class AVRequestService {
         //use the restTemplate to submit a GET request with user variables
         ResponseEntity<String> initialRes = restTemplate.getForEntity(AlphaVantageUri, String.class, symbol);
 
-        StockPriceRpsyService.saveAVPrices(symbol, initialRes, days);
+        StockPriceRpsyService.saveAVPrices(symbol, initialRes);
         return StockPriceRpsyService.retrievePrices(symbol,days);
     }
 }
