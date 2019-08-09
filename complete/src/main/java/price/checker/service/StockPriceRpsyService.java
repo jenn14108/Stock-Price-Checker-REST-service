@@ -60,6 +60,8 @@ public class StockPriceRpsyService {
     public void saveAVPrices(String symbol, ResponseEntity<String> initialRes, Integer days)
                                 throws IOException, ParseException {
 
+        //create a List to store all Stock Price objects for batch save
+        List<StockPrice> prices = new ArrayList<>();
         //create a JsonNode as the root
         JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
 
@@ -77,9 +79,10 @@ public class StockPriceRpsyService {
                     Double.parseDouble(dateNode.findValue("3. low").asText()),
                     Double.parseDouble(dateNode.findValue("4. close").asText()),
                     Integer.parseInt(dateNode.findValue("5. volume").asText()));
-            stockPriceRepository.save(spObj);
-            log.info("We have successfully saved new object {} of {} into db",
-                    spObj.getSymbol(), spObj.getDate());
+            prices.add(spObj);
+            //log.info("We have successfully saved new object {} of {} into db",spObj.getSymbol(), spObj.getDate());
         }
+        stockPriceRepository.saveAll(prices);
+        log.info("Saved all new prices");
     }
 }
