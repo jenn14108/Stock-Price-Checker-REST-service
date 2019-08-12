@@ -3,6 +3,7 @@ package price.checker.entrypoint;
 import java.io.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,8 +39,8 @@ public class RequestController {
             produces =  MediaType.APPLICATION_JSON_VALUE)
     //we want to take in two parameters - the ticker and the number of days of data to display
     public String getPrices(
-            @RequestParam(value = "symbol" , defaultValue="DNKN") String symbol,
-            @RequestParam(value = "days", defaultValue="5") Integer days)
+            @RequestParam(value = "symbol" , required=true) String symbol,
+            @RequestParam(value = "days", required=true) Integer days)
             throws IOException, ParseException {
 
         Integer found = StockPriceRpsyService.checkForWantedPrices(symbol);

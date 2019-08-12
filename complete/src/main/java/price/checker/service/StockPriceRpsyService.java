@@ -57,6 +57,8 @@ public class StockPriceRpsyService {
     /**
      * This method is used to parse the returned JSON data from Alpha Vantage to only display
      * the stock prices for the number of days specified by the user
+     * REMEMBER: stock market opens at 9:30am so you will not get stock data from previous day until
+     * it's 9:30am...
      * @param initialRes
      * @return
      * @throws IOException
@@ -72,6 +74,7 @@ public class StockPriceRpsyService {
         if (currInDB != null){
             currDateDBString = DF.format(currInDB);
         }
+        log.info("this is the current date string that is in the DB for {}: {}, ", symbol, currDateDBString);
         //create a JsonNode as the root
         JsonNode rootNode = new ObjectMapper().readTree(initialRes.getBody());
 
@@ -85,7 +88,9 @@ public class StockPriceRpsyService {
 
         //now we need to loop through and get all the stock prices and save into db
         while (dates.hasNext()) {
+
             String dateString = dates.next();
+            log.info("this is the date that should be saved: {}", dateString);
             if (dateString.equals(currDateDBString)){
                 break;
             }
@@ -97,7 +102,7 @@ public class StockPriceRpsyService {
                     Double.parseDouble(dateNode.findValue("4. close").asText()),
                     Integer.parseInt(dateNode.findValue("5. volume").asText()));
             prices.add(spObj);
-            //log.info("We have successfully saved new object {} of {} into db",spObj.getSymbol(), spObj.getDate());
+            log.info("We have successfully saved new object {} of {} into db",spObj.getSymbol(), spObj.getDate());
         }
         stockPriceRepository.saveAll(prices);
         log.info("Saved all new prices");
