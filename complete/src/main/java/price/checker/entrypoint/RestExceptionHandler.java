@@ -28,7 +28,7 @@ public class RestExceptionHandler {
             final MissingServletRequestParameterException exception){
         log.debug("Missing Parameter sent ", exception);
         String errorMessage = "Required parameters 'symbol' and 'days' missing. Please try your request again " +
-                                                                "with all the required parameters.";
+                "with all the required parameters.";
 
         ApiError error = new ApiError(HttpStatus.BAD_REQUEST,errorMessage);
         return buildResponseEntity(error);
