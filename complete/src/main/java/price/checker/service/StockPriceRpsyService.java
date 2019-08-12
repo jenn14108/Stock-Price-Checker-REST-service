@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import price.checker.domain.rpsy.StockPriceRepository;
 import price.checker.domain.StockPrice;
+import price.checker.entrypoint.exception.EntityNotFoundException;
+
+import javax.swing.text.html.parser.Entity;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -81,6 +84,14 @@ public class StockPriceRpsyService {
 
         //this is the chunk of JSON with all the stock info
         JsonNode timeSeriesStart = rootNode.get("Time Series (Daily)");
+
+        //throw custom error if timeSeriesStart node is null - indicates that there might be a typo when
+        //identifying symbol, or that the company simply does not exist
+        if (timeSeriesStart == null){
+            throw new EntityNotFoundException(symbol);
+        }
+
+
         Iterator<String> dates = timeSeriesStart.fieldNames();
 
         //we want to skip today, because prices and trading volume is still changing
