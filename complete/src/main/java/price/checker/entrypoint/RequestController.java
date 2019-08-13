@@ -24,12 +24,12 @@ import java.util.List;
 public class RequestController {
 
     //let Spring do its thing and initialize the two services
+
     @Autowired
     StockPriceRpsyService StockPriceRpsyService;
 
     @Autowired
     AVRequestService AVRequestService;
-
     /**
      * This method passes the user input to StockPriceRpsyService to check for data
      * in DB - if not StockPriceRpsyService calls AVRequestService to query Alpha Vantage API
